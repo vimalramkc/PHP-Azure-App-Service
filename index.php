@@ -2,8 +2,13 @@
 
 echo "Hello World<br>";
 
-// simulate external API call
-$response = file_get_contents("https://jsonplaceholder.typicode.com/posts/1");
+// Use cURL (Datadog tracks this)
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, "https://jsonplaceholder.typicode.com/posts/1");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+curl_close($ch);
 
 echo "API call completed<br>";
 
