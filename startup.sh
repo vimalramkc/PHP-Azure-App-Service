@@ -1,89 +1,77 @@
 #!/usr/bin/env bash
+set -x
 
 echo "===== eG APM Setup Starting ====="
 
 # -------------------------------
-# Config
+# CONFIG
 # -------------------------------
-DOWNLOAD_URL="https://github.com/vimalramkc/eg-apm-package/releases/download/v1.0/eGagent_linux_x64.tar.gz"
-INSTALL_DIR="/home/site/wwwroot/egagent"
+DOWNLOAD_URL="https://github.com/vimalramkc/eg-apm-package/releases/download/v1.1/eg-php-btm.tar.gz"
+INSTALL_DIR="/home/site/wwwroot/egbtm"
 INI_FILE="/home/site/wwwroot/99-egurkha.ini"
 
 # -------------------------------
-# Create working directory
+# PREPARE DIRECTORY
 # -------------------------------
 mkdir -p $INSTALL_DIR
 cd $INSTALL_DIR
 
 # -------------------------------
-# Download only if not exists
+# DOWNLOAD (fresh every time)
 # -------------------------------
-if [ ! -f "egagent.tar.gz" ]; then
-    echo "Downloading eG agent..."
-    curl -L --fail -o egagent.tar.gz $DOWNLOAD_URL
+rm -f eg-php-btm.tar.gz
 
-    if [ $? -ne 0 ]; then
-        echo "Download failed ❌"
-        exit 1
-    fi
-else
-    echo "Using existing downloaded package"
-fi
+echo "Downloading eG PHP BTM package..."
+curl -L --fail -o eg-php-btm.tar.gz $DOWNLOAD_URL || { echo "Download failed ❌"; exit 1; }
 
 # -------------------------------
-# Extract only if not extracted
+# EXTRACT
 # -------------------------------
-if [ ! -d "egurkha" ]; then
-    echo "Extracting package..."
-    tar -xzf egagent.tar.gz
-else
-    echo "Already extracted"
-fi
+echo "Extracting package..."
+tar -xzf eg-php-btm.tar.gz || { echo "Extraction failed ❌"; exit 1; }
 
 # -------------------------------
-# Detect PHP version
+# DETECT PHP VERSION
 # -------------------------------
 PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;")
 echo "Detected PHP Version: $PHP_VERSION"
 
 # -------------------------------
-# Find correct .so dynamically
+# SELECT CORRECT .SO
 # -------------------------------
-SO_RELATIVE=$(find egurkha/lib64 -name "eG_phpBTM_${PHP_VERSION}.so" | head -n 1)
+SO_FILE="$INSTALL_DIR/debian/eG_phpBTM_${PHP_VERSION}.so"
 
-if [ -z "$SO_RELATIVE" ]; then
+if [ ! -f "$SO_FILE" ]; then
     echo "No matching .so found for PHP $PHP_VERSION ❌"
     exit 1
 fi
 
-FULL_SO_PATH="$INSTALL_DIR/$SO_RELATIVE"
-echo "Using SO file: $FULL_SO_PATH"
+echo "Using SO file: $SO_FILE"
 
 # -------------------------------
-# Create ini file
+# CREATE INI FILE
 # -------------------------------
 echo "Creating INI file..."
-
-echo "extension=$FULL_SO_PATH" > $INI_FILE
-echo "egurkha.controller.host=YOUR_MANAGER_IP" >> $INI_FILE
-echo "egurkha.controller.port=7077" >> $INI_FILE
+echo "extension=$SO_FILE" > $INI_FILE
 
 # -------------------------------
-# Load custom ini directory
+# LOAD CUSTOM INI
 # -------------------------------
 export PHP_INI_SCAN_DIR="/usr/local/etc/php/conf.d:/home/site/wwwroot"
 echo "PHP_INI_SCAN_DIR=$PHP_INI_SCAN_DIR"
 
 # -------------------------------
-# Verify installation
+# VERIFY EXTENSION
 # -------------------------------
 echo "Verifying extension..."
 php -m | grep -i eg
 
 # -------------------------------
-# Done
+# DONE
 # -------------------------------
 echo "===== eG APM Setup Completed ====="
 
-# Start the app
+# -------------------------------
+# START APP
+# -------------------------------
 exec "$@"
