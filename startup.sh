@@ -11,13 +11,25 @@ INSTALL_DIR="/home/site/wwwroot/egbtm"
 INI_FILE="/home/site/wwwroot/99-egurkha.ini"
 
 # -------------------------------
+# CLEAN ALL APM CONFIGS (IMPORTANT)
+# -------------------------------
+echo "Cleaning existing APM configs..."
+
+rm -f /usr/local/etc/php/conf.d/*ddtrace*
+rm -f /usr/local/etc/php/conf.d/*datadog*
+rm -f /usr/local/etc/php/conf.d/*appdynamics*
+rm -f /usr/local/etc/php/conf.d/*eg*
+rm -f /usr/local/etc/php/conf.d/*apm*
+rm -f /home/site/wwwroot/*.ini
+
+# -------------------------------
 # PREPARE DIRECTORY
 # -------------------------------
 mkdir -p $INSTALL_DIR
 cd $INSTALL_DIR
 
 # -------------------------------
-# DOWNLOAD (fresh every time)
+# DOWNLOAD
 # -------------------------------
 rm -f eg-php-btm.tar.gz
 
@@ -49,19 +61,20 @@ fi
 echo "Using SO file: $SO_FILE"
 
 # -------------------------------
-# CREATE INI FILE
+# CREATE CLEAN INI
 # -------------------------------
 echo "Creating INI file..."
 echo "extension=$SO_FILE" > $INI_FILE
 
 # -------------------------------
-# LOAD CUSTOM INI
+# FORCE ONLY THIS INI
 # -------------------------------
-export PHP_INI_SCAN_DIR="/usr/local/etc/php/conf.d:/home/site/wwwroot"
+export PHP_INI_SCAN_DIR="/home/site/wwwroot"
+
 echo "PHP_INI_SCAN_DIR=$PHP_INI_SCAN_DIR"
 
 # -------------------------------
-# VERIFY EXTENSION
+# VERIFY
 # -------------------------------
 echo "Verifying extension..."
 php -m | grep -i eg
@@ -71,7 +84,4 @@ php -m | grep -i eg
 # -------------------------------
 echo "===== eG APM Setup Completed ====="
 
-# -------------------------------
-# START APP
-# -------------------------------
 exec "$@"
