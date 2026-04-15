@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -x
 
 echo "===== eG APM Setup Starting ====="
 
@@ -50,7 +49,7 @@ echo "Detected PHP Version: $PHP_VERSION"
 # -------------------------------
 # Find correct .so dynamically
 # -------------------------------
-SO_RELATIVE=$(find egurkha/lib -name "eG_phpBTM_${PHP_VERSION}.so" | head -n 1)
+SO_RELATIVE=$(find egurkha/lib64 -name "eG_phpBTM_${PHP_VERSION}.so" | head -n 1)
 
 if [ -z "$SO_RELATIVE" ]; then
     echo "No matching .so found for PHP $PHP_VERSION ❌"
