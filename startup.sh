@@ -69,10 +69,8 @@ echo "extension=$SO_FILE" > $INI_FILE
 # -------------------------------
 # FORCE ONLY THIS INI
 # -------------------------------
-export PHP_INI_SCAN_DIR="/home/site/wwwroot"
-
-echo "PHP_INI_SCAN_DIR=$PHP_INI_SCAN_DIR"
-
+echo "Copying INI to PHP conf.d..."
+cp $INI_FILE /usr/local/etc/php/conf.d/99-egurkha.ini
 # -------------------------------
 # VERIFY
 # -------------------------------
