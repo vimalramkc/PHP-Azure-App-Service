@@ -1,42 +1,5 @@
 #!/usr/bin/env bash
-
-echo "===== eG APM Setup Starting ====="
-
-# -------------------------------
-# Config
-# -------------------------------
-DOWNLOAD_URL="https://github.com/vimalramkc/eg-apm-package/releases/download/v1.0/eGagent_linux_x64.tar.gz"
-INSTALL_DIR="/home/site/wwwroot/egagent"
-INI_FILE="/home/site/wwwroot/99-egurkha.ini"
-
-# -------------------------------
-# Create working directory
-# -------------------------------
-mkdir -p $INSTALL_DIR
-cd $INSTALL_DIR
-
-# -------------------------------
-# Download only if not exists
-# -------------------------------
-if [ ! -f "egagent.tar.gz" ]; then
-    echo "Downloading eG agent..."
-    curl -L --fail -o egagent.tar.gz $DOWNLOAD_URL
-
-    if [ $? -ne 0 ]; then
-        echo "Download failed ❌"
-        exit 1
-    fi
-else
-    echo "Using existing downloaded package"
-fi
-
-# -------------------------------
-# Extract only if not extracted
-# -------------------------------
-if [ ! -d "egurkha" ]; then
-    echo "Extracting package..."
-    tar -xzf egagent.tar.gz
-#!/usr/bin/env bash
+set -x
 
 echo "===== eG APM Setup Starting ====="
 
@@ -87,7 +50,7 @@ echo "Detected PHP Version: $PHP_VERSION"
 # -------------------------------
 # Find correct .so dynamically
 # -------------------------------
-SO_RELATIVE=$(find egurkha/lib64 -name "eG_phpBTM_${PHP_VERSION}.so" | head -n 1)
+SO_RELATIVE=$(find egurkha/lib -name "eG_phpBTM_${PHP_VERSION}.so" | head -n 1)
 
 if [ -z "$SO_RELATIVE" ]; then
     echo "No matching .so found for PHP $PHP_VERSION ❌"
@@ -103,6 +66,8 @@ echo "Using SO file: $FULL_SO_PATH"
 echo "Creating INI file..."
 
 echo "extension=$FULL_SO_PATH" > $INI_FILE
+echo "egurkha.controller.host=YOUR_MANAGER_IP" >> $INI_FILE
+echo "egurkha.controller.port=7077" >> $INI_FILE
 
 # -------------------------------
 # Load custom ini directory
